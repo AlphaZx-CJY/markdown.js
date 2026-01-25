@@ -1,25 +1,22 @@
-export interface ASTNode {
-  type: string;
-  children?: ASTNode[];
-  value?: string;
-  lang?: string;
-  href?: string;
-  checked?: boolean;
-  level?: number;
-  [key: string]: any;
+import type { ASTNode } from './ast';
+
+export type { ASTNode };
+
+export interface PluginInitContext {
+  parseInline: ParseFunc;
+  parseBlock: ParseFunc;
 }
 
-export type PluginType = 'block' | 'inline';
-
 export interface Plugin {
-  type: PluginType;
   name: string;
+  kind?: 'inline' | 'block' | 'both';
+  init?: (ctx: PluginInitContext) => void;
   parser: Parser<ASTNode>;
   renderer: (node: ASTNode, children: string) => string;
 }
 
 export interface MarkdownParserOptions {
-  plugins?: Plugin[];
+  plugins?: (() => Plugin)[];
   // If override is true, all built-in plugins will not effect
   // If override is false and plugin's name is same as built-in plugin's name, built-in plugin will be replaced by the latest plugin
   override?: boolean;
@@ -28,12 +25,9 @@ export interface MarkdownParserOptions {
 
 export type Parser<T> = (input: string, pos: number) => ParseResult<T> | null;
 
+export type ParseFunc = (text: string) => ASTNode[];
+
 export interface ParseResult<T> {
   value: T;
   nextPos: number;
-}
-
-export interface ParserContext {
-  input: string;
-  pos: number;
 }

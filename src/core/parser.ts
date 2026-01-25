@@ -1,141 +1,95 @@
-import heading from '../plugins/heading';
-import strong from '../plugins/strong';
-import type { ASTNode, Plugin, MarkdownParserOptions, ParserContext } from '../types';
+import { anyOf, char, eof, until } from '../combinator';
+import { BUILT_IN_PLUGINS, paragraph } from '../plugins';
+import type { ASTNode, Plugin, MarkdownParserOptions, Parser } from './types';
 
 export class MarkdownParser {
-  private _blockPlugins: Map<string, Plugin> = new Map();
-  private _inlinePlugins: Map<string, Plugin> = new Map();
+  private blockPlugins: Plugin[] = [];
+  private inlinePlugins: Plugin[] = [];
 
   constructor(options?: MarkdownParserOptions) {
-    const builtInPlugins = [heading(this.parseInline), strong(this.parseInline)];
-    if (!options) {
-      this.addPlugins(builtInPlugins);
-    } else {
-      if (!options.override) {
-        this.addPlugins(builtInPlugins);
-      }
-      if (options.plugins) {
-        this.addPlugins(options.plugins);
-      }
+    const pluginsMap: Map<string, Plugin> = new Map();
+    let plugins: (() => Plugin)[] = [];
+    if (!options || !options.override) {
+      plugins = BUILT_IN_PLUGINS;
     }
-  }
+    if (options?.plugins) {
+      plugins.push(...options.plugins);
+    }
+    const instantiated = plugins.map((p) => p());
+    // reject default paragraph plugin if user provided custom one
+    instantiated.push(paragraph());
+    instantiated.forEach((p) => {
+      pluginsMap.set(p.name, p);
+    });
+    const deduplicated = Array.from(pluginsMap.values());
+    this.blockPlugins = deduplicated.filter((plugin) => plugin.kind !== 'inline');
+    this.inlinePlugins = deduplicated.filter((plugin) => plugin.kind !== 'block');
 
-  get blockPlugins(): Plugin[] {
-    return Array.from(this._blockPlugins.values());
-  }
+    // inject parsing helpers into plugins
+    const ctx = {
+      parseInline: this.parseInline.bind(this),
+      parseBlock: this.parseBlock.bind(this),
+    };
 
-  get inlinePlugins(): Plugin[] {
-    return Array.from(this._inlinePlugins.values());
+    deduplicated.forEach((plugin) => {
+      if (plugin.init) {
+        plugin.init(ctx);
+      }
+    });
   }
 
   parse(input: string): ASTNode {
-    const context = { input, pos: 0 };
-    return this.parseDocument(context);
-  }
-
-  private addPlugins(plugins: Plugin[]): void {
-    for (const plugin of plugins) {
-      if (plugin.type === 'block') {
-        this._blockPlugins.set(plugin.name, plugin);
-      } else {
-        this._inlinePlugins.set(plugin.name, plugin);
-      }
-    }
-  }
-
-  private parseDocument(context: ParserContext): ASTNode {
-    const children = this.parseBlocks(context);
+    const children = this.parseBlock(input);
     return {
       type: 'document',
       children,
     };
   }
 
-  private parseBlocks(context: ParserContext): ASTNode[] {
+  get blockParsers(): Parser<ASTNode>[] {
+    return this.blockPlugins.map((p) => p.parser);
+  }
+
+  get inlineParsers(): Parser<ASTNode>[] {
+    return this.inlinePlugins.map((p) => p.parser);
+  }
+
+  private parseBlock(input: string): ASTNode[] {
     const blocks: ASTNode[] = [];
-
-    while (context.pos < context.input.length) {
-      if (this.isWhitespaceLine(context)) {
-        context.pos += this.getLineEnd(context);
-        continue;
-      }
-
-      const block = this.parseBlock(context);
-      if (block) {
-        blocks.push(block);
-        context.pos = block.nextPos;
+    let pos = 0;
+    while (pos < input.length) {
+      const res = anyOf(...this.blockParsers)(input, pos);
+      if (res) {
+        blocks.push(res.value);
+        pos = res.nextPos;
       } else {
-        // 默认段落处理
-        const paragraph = this.parseParagraph(context);
-        if (paragraph) {
-          blocks.push(paragraph);
-          context.pos = paragraph.nextPos;
-        } else {
-          context.pos++;
-        }
+        break; // if no parser matches, exit to avoid infinite loop
       }
     }
-
     return blocks;
   }
 
-  private parseBlock(context: ParserContext): ASTNode | null {
-    for (const parser of this.blockPlugins) {
-      const result = parser.parser(context.input, context.pos);
-      if (result) return result.value;
-    }
-    return null;
-  }
-
-  private parseParagraph(context: ParserContext): ASTNode | null {
-    const endPos = this.findBlockEnd(context);
-    const content = context.input.slice(context.pos, endPos);
-    context.pos = endPos;
-    return {
-      type: 'paragraph',
-      children: this.parseInline(content.trim()),
-    };
-  }
-
-  private parseInline(text: string): ASTNode[] {
-    const result: ASTNode[] = [];
+  private parseInline(input: string): ASTNode[] {
+    const inlines: ASTNode[] = [];
     let pos = 0;
-
-    while (pos < text.length) {
-      let matched = false;
-
-      for (const parser of this.inlinePlugins) {
-        const node = parser.parser(text, pos);
-        if (node) {
-          result.push(node.value);
-          pos = node.nextPos;
-          matched = true;
-          break;
+    let remainingText = '';
+    while (pos < input.length) {
+      const res = anyOf(...this.inlineParsers)(input, pos);
+      if (res) {
+        if (remainingText.trim()) {
+          inlines.push({ type: 'text', value: remainingText.trim() });
+          remainingText = '';
         }
-      }
-
-      if (!matched) {
-        result.push({ type: 'text', value: text[pos] });
+        inlines.push(res.value);
+        pos = res.nextPos;
+      } else {
+        remainingText += input[pos];
         pos++;
       }
     }
-
-    return result;
-  }
-
-  private findBlockEnd(context: ParserContext): number {
-    const nextBreak = context.input.indexOf('\n\n', context.pos);
-    return nextBreak === -1 ? context.input.length : nextBreak;
-  }
-
-  private isWhitespaceLine(context: ParserContext): boolean {
-    const lineEnd = this.getLineEnd(context);
-    const line = context.input.slice(context.pos, lineEnd);
-    return /^\s*$/.test(line);
-  }
-
-  private getLineEnd(context: ParserContext): number {
-    const newlinePos = context.input.indexOf('\n', context.pos);
-    return newlinePos === -1 ? context.input.length : newlinePos + 1;
+    if (remainingText.trim()) {
+      inlines.push({ type: 'text', value: remainingText.trim() });
+    }
+    return inlines;
   }
 }

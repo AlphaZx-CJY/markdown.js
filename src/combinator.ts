@@ -1,4 +1,4 @@
-import type { Parser } from './types';
+import type { Parser } from './core/types';
 
 export const char =
   (c: string): Parser<string> =>
@@ -16,19 +16,24 @@ export const string =
     return { value: s, nextPos: pos + s.length };
   };
 
-export const range =
-  (start: string, end: string): Parser<string> =>
-  (input, pos) => {
-    if (pos >= input.length) return null;
-    const c = input[pos];
-    if (c < start || c > end) return null;
-    return { value: c, nextPos: pos + 1 };
-  };
-
 export const anyChar: Parser<string> = (input, pos) => {
   if (pos >= input.length) return null;
   return { value: input[pos], nextPos: pos + 1 };
 };
+
+export const many =
+  <T>(parser: Parser<T>): Parser<T[]> =>
+  (input, pos) => {
+    const result: T[] = [];
+    let currentPos = pos;
+    let parsed = parser(input, currentPos);
+    while (parsed) {
+      result.push(parsed.value);
+      currentPos = parsed.nextPos;
+      parsed = parser(input, currentPos);
+    }
+    return { value: result, nextPos: currentPos };
+  };
 
 export const many1 =
   <T>(parser: Parser<T>): Parser<T[]> =>
@@ -52,7 +57,7 @@ export const optional =
   };
 
 export const map =
-  <T, U>(parser: Parser<T>, fn: (value: T) => U): Parser<U> =>
+  <T, U>(parser: Parser<T>, fn: (value: T) => U | null): Parser<U> =>
   (input, pos) => {
     const result = parser(input, pos);
     if (!result) {
@@ -97,21 +102,48 @@ export const anyOf =
     return null;
   };
 
-export const skip = <T>(parser: Parser<T>): Parser<void> => map(parser, () => undefined);
-
-export function until(endChar: string): Parser<string> {
-  return (input, pos) => {
-    let end = input.length - endChar.length + 1;
-    let cur = pos;
-    while (cur <= end) {
-      if (input.slice(cur, cur + endChar.length) === endChar) {
-        break;
-      }
-      cur++;
-    }
-    if (cur > end) {
+export const oneOf =
+  (s: string): Parser<string> =>
+  (input, pos) => {
+    if (pos >= input.length) {
       return null;
     }
-    return { value: input.slice(pos, cur), nextPos: cur };
+    if (s.includes(input[pos])) {
+      return { value: input[pos], nextPos: pos + 1 };
+    }
+    return null;
   };
-}
+
+export const skip = <T>(parser: Parser<T>): Parser<void> => map(parser, () => undefined);
+
+export const until =
+  <T>(parser: Parser<T>): Parser<string> =>
+  (input, pos) => {
+    let value = '';
+    let cur = pos;
+    while (cur < input.length) {
+      const result = parser(input, cur);
+      if (result !== null) {
+        break;
+      }
+      if (cur >= input.length) {
+        break;
+      }
+      value += input[cur];
+      cur++;
+    }
+    return {
+      value,
+      nextPos: cur,
+    };
+  };
+
+export const eof = (): Parser<null> => (input, pos) => {
+  if (pos >= input.length) {
+    return {
+      value: null,
+      nextPos: pos,
+    };
+  }
+  return null;
+};

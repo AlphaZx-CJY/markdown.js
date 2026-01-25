@@ -1,26 +1,30 @@
+import { MarkdownParser } from './core/parser.ts';
+import '@congjiye/nanocss/dist/nano.min.css';
 import './style.css';
-import typescriptLogo from './typescript.svg';
-import viteLogo from '/vite.svg';
-import { markd, setupCounter } from './counter.ts';
+
+function markd(input: HTMLTextAreaElement, output: HTMLDivElement) {
+  const parser = new MarkdownParser();
+  input.addEventListener('input', () => {
+    const content = parser.parse(input.value);
+    const ast = JSON.stringify(content, null, 2);
+    output.innerText = ast;
+  });
+}
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-      <button id="markdown" type="button></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
-  </div>
+  <main>
+    <header>
+      <h1>Markdown 转换</h1>
+    </header>
+    <textarea rows="10" id="editor"></textarea>
+    <fieldset>
+      <legend>中间产物</legend>
+      <pre><code id="markdown"></code></pre>
+    </fieldset>
+  </main>
 `;
 
-setupCounter(document.querySelector<HTMLButtonElement>('#counter')!);
-markd(document.querySelector<HTMLButtonElement>('#markdown')!);
+markd(
+  document.querySelector<HTMLTextAreaElement>('#editor')!,
+  document.querySelector<HTMLDivElement>('#markdown')!
+);
