@@ -1,4 +1,4 @@
-import { anyOf, char, eof, map, sequence, until } from '../combinator';
+import { anyOf, eof, map, until, string, many1 } from '../combinator';
 import type { Paragraph } from '../core/ast';
 import type { ASTNode, ParseFunc, Plugin, PluginInitContext } from '../core/types';
 
@@ -11,13 +11,21 @@ export default (): Plugin => {
       parseInline = ctx.parseInline;
     },
     parser: map(
-      sequence(
-        until(anyOf(char('\n\n'), eof())), // Parser<string>
-      ),
-      ([content]): Paragraph => {
+      until(
+        anyOf(
+          string('\n\n'),
+          string('<br>'),
+          string('<br />'),
+          map(many1(string('  \n')), () => '\n'),
+          eof()
+        )
+      ), // Parser<string>
+      (content): Paragraph | null => {
+        const trimmed = content.trim();
+        if (!trimmed) return null;
         return {
           type: 'paragraph',
-          children: parseInline(content.trim()),
+          children: parseInline(trimmed.replaceAll('\n', ' ')),
         };
       }
     ),

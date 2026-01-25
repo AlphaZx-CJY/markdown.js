@@ -5,7 +5,7 @@ import type { ASTNode, Plugin } from '../core/types';
 // TODO: fix multi blank line
 export default (): Plugin => ({
   name: 'linebreak',
-  kind: 'inline',
+  kind: 'both',
   parser: map(
     anyOf(
       string('<br>'),
