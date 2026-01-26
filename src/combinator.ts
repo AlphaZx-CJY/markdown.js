@@ -127,7 +127,7 @@ export const until =
         break;
       }
       if (cur >= input.length) {
-        break;
+        return null;
       }
       value += input[cur];
       cur++;

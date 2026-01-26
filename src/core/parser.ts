@@ -1,4 +1,4 @@
-import { anyOf, char, eof, until } from '../combinator';
+import { anyOf } from '../combinator';
 import { BUILT_IN_PLUGINS, paragraph } from '../plugins';
 import type { ASTNode, Plugin, MarkdownParserOptions, Parser } from './types';
 
@@ -29,6 +29,13 @@ export class MarkdownParser {
     const ctx = {
       parseInline: this.parseInline.bind(this),
       parseBlock: this.parseBlock.bind(this),
+      canParseBlock: (text: string) => {
+        const blockParsersExceptParagraph = this.blockPlugins
+          .filter((p) => p.name !== 'paragraph')
+          .map((p) => p.parser);
+        const res = anyOf(...blockParsersExceptParagraph)(text, 0);
+        return res !== null;
+      },
     };
 
     deduplicated.forEach((plugin) => {

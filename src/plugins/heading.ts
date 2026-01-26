@@ -13,7 +13,7 @@ export default (): Plugin => {
     parser: map(
       sequence(
         many1(char('#')), // Parser<string[]>
-        many(char(' ')), // Parser<string[]>
+        many1(char(' ')), // Parser<string[]>
         until(anyOf(char('\n'), eof())), // Parser<string>,
         optional(char('\n'))
       ),

@@ -1,25 +1,32 @@
-import { anyOf, eof, map, until, string, many1 } from '../combinator';
+import { anyOf, eof, map, until, string, char, sequence } from '../combinator';
 import type { Paragraph } from '../core/ast';
 import type { ASTNode, ParseFunc, Plugin, PluginInitContext } from '../core/types';
 
 export default (): Plugin => {
   let parseInline: ParseFunc = () => [];
+  let canParseBlock: (text: string) => boolean = () => false;
+
   return {
     name: 'paragraph',
     kind: 'block',
     init(ctx: PluginInitContext) {
       parseInline = ctx.parseInline;
+      canParseBlock = ctx.canParseBlock;
     },
     parser: map(
-      until(
-        anyOf(
-          string('\n\n'),
-          string('<br>'),
-          string('<br />'),
-          map(many1(string('  \n')), () => '\n'),
-          eof()
-        )
-      ), // Parser<string>
+      anyOf(
+        map(
+          sequence(until(char('\n')), (input, pos) => {
+            // If the next line can be parsed as a block element, end the paragraph here.
+            if (canParseBlock(input.slice(pos + 1))) {
+              return { value: null, nextPos: pos + 1 };
+            }
+            return null;
+          }),
+          ([content]) => content
+        ),
+        until(anyOf(string('\n\n'), eof())) // Parser<string>, normal paragraph ending with double new line or EOF
+      ),
       (content): Paragraph | null => {
         const trimmed = content.trim();
         if (!trimmed) return null;

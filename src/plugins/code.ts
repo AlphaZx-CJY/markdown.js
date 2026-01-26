@@ -1,4 +1,4 @@
-import { anyOf, char, map, sequence, until } from '../combinator';
+import { anyOf, char, map, sequence, string, until } from '../combinator';
 import type { InlineCode } from '../core/ast';
 import type { ASTNode, Plugin } from '../core/types';
 
@@ -9,9 +9,9 @@ export default (): Plugin => ({
   parser: map(
     anyOf(
       sequence(
-        char('``'), // Parser<string>
-        until(char('``')), // Parser<string>
-        char('``') // Parser<string>
+        string('``'), // Parser<string>
+        until(string('``')), // Parser<string>
+        string('``') // Parser<string>
       ),
       sequence(
         char('`'), // Parser<string>

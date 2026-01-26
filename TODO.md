@@ -2,17 +2,19 @@
 
 ## Base syntax
 
-- [ ] heading
+- [X] heading
 - [X] bold
 - [X] italic
 - [ ] blockquote
 - [ ] ordered list
 - [ ] unordered list
-- [ ] code
+- [X] code
 - [X] horizontal rule
 - [ ] link
 - [ ] image
 - [ ] break line
+- [X] paragraph
+- [ ] text
 
 ## Extend syntax
 

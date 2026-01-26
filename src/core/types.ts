@@ -5,6 +5,7 @@ export type { ASTNode };
 export interface PluginInitContext {
   parseInline: ParseFunc;
   parseBlock: ParseFunc;
+  canParseBlock: (text: string) => boolean;
 }
 
 export interface Plugin {
