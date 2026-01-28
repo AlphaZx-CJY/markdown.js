@@ -1,5 +1,5 @@
 import type { ASTNode, ParseFunc, Plugin, PluginInitContext } from '../core/types';
-import { char, map, sequence, many1, until, anyOf, eof, many, optional } from '../combinator';
+import { char, map, sequence, many1, until, anyOf, eof, optional } from '../combinator';
 import type { Heading } from '../core/ast';
 
 export default (): Plugin => {

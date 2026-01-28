@@ -2,7 +2,6 @@ import { anyOf, char, many, many1, map, oneOf, optional, sequence, until } from 
 import type { Image } from '../core/ast';
 import type { ASTNode, ParseFunc, Plugin, PluginInitContext } from '../core/types';
 
-// TODO: fix multi blank line should not transfer to img bug
 export default (): Plugin => {
   let parseInline: ParseFunc = () => [];
   return {

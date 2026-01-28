@@ -2,8 +2,6 @@ import { anyOf, char, eof, many1, map, optional, sequence, until } from '../comb
 import type { Blockquote } from '../core/ast';
 import type { ASTNode, ParseFunc, Plugin, PluginInitContext } from '../core/types';
 
-// TODO: count space after '>'.
-// if space count greater than 4, create a sub blockquote
 export default (): Plugin => {
   let parseBlock: ParseFunc = () => [];
   return {

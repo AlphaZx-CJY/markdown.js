@@ -2,23 +2,27 @@
 
 ## Base syntax
 
-- [X] heading
-- [X] bold
-- [X] italic
-- [ ] blockquote
+- [x] [heading](src/plugins/heading.ts)
+- [x] [bold](src/plugins/strong.ts)
+- [x] [italic](src/plugins/italic.ts)
+- [x] [blockquote](src/plugins/blockquote.ts)
 - [ ] ordered list
 - [ ] unordered list
-- [X] code
-- [X] horizontal rule
-- [ ] link
-- [ ] image
-- [ ] break line
-- [X] paragraph
+- [x] [code](src/plugins/code.ts)
+- [x] [horizontal rule](src/plugins/hr.ts)
+- [ ] [link](src/plugins/link.ts)
+- [x] [image](src/plugins/image.ts)
+- [x] [break line](src/plugins/br.ts)
+- [x] [paragraph](src/plugins/paragraph.ts)
 - [ ] text
+- [x] escaping
+- [ ] html
 
 ## Extend syntax
 
-- [ ] del
-- [ ] codeblock
+- [x] [del](src/plugins/del.ts)
+- [x] [mark](src/plugins/mark.ts)
+- [x] [codeblock](src/plugins/codeblock.ts)
 - [ ] table
 - [ ] checkbox
+- [ ] underline

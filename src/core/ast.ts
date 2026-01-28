@@ -13,7 +13,10 @@ export type MarkdownNode =
   | Image
   | HorizontalRule
   | LineBreak
-  | Blockquote;
+  | Blockquote
+  | Del
+  | Mark
+  | Escape;
 
 export type ASTNode = MarkdownNode | Generic;
 
@@ -100,4 +103,19 @@ export interface LineBreak {
 export interface Blockquote {
   type: 'blockquote';
   children: ASTNode[];
+}
+
+export interface Del {
+  type: 'del';
+  children: ASTNode[];
+}
+
+export interface Mark {
+  type: 'mark';
+  children: ASTNode[];
+}
+
+export interface Escape {
+  type: 'escaping';
+  value: string;
 }

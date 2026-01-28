@@ -8,7 +8,40 @@ import italic from './italic';
 import link from './link';
 import strong from './strong';
 import paragraph from './paragraph';
+import del from './del';
+import mark from './mark';
+import escaping from './escaping';
+import codeblock from './codeblock';
 
-export { heading, strong, italic, code, hr, image, link, br, blockquote, paragraph };
+export {
+  heading,
+  strong,
+  italic,
+  code,
+  hr,
+  image,
+  link,
+  br,
+  blockquote,
+  paragraph,
+  del,
+  mark,
+  escaping,
+  codeblock,
+};
 
-export const BUILT_IN_PLUGINS = [heading, strong, italic, code, hr, image, link, br, blockquote];
+export const BUILT_IN_PLUGINS = [
+  heading,
+  strong,
+  italic,
+  code,
+  hr,
+  image,
+  link,
+  br,
+  blockquote,
+  del,
+  mark,
+  escaping,
+  codeblock,
+];
