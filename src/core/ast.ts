@@ -16,7 +16,8 @@ export type MarkdownNode =
   | Blockquote
   | Del
   | Mark
-  | Escape;
+  | Escape
+  | Underscore;
 
 export type ASTNode = MarkdownNode | Generic;
 
@@ -45,11 +46,13 @@ export interface Codeblock {
 
 export interface List {
   type: 'list';
+  ordered: boolean;
   children: ListItem[];
 }
 
 export interface ListItem {
-  type: 'list_item';
+  type: 'listItem';
+  indent?: number;
   checked?: boolean;
   children: ASTNode[];
 }
@@ -118,4 +121,9 @@ export interface Mark {
 export interface Escape {
   type: 'escaping';
   value: string;
+}
+
+export interface Underscore {
+  type: 'underscore';
+  children: ASTNode[];
 }

@@ -12,6 +12,8 @@ import del from './del';
 import mark from './mark';
 import escaping from './escaping';
 import codeblock from './codeblock';
+import underscore from './underscore';
+import list from './list';
 
 export {
   heading,
@@ -28,6 +30,7 @@ export {
   mark,
   escaping,
   codeblock,
+  underscore,
 };
 
 export const BUILT_IN_PLUGINS = [
@@ -44,4 +47,6 @@ export const BUILT_IN_PLUGINS = [
   mark,
   escaping,
   codeblock,
+  underscore,
+  list,
 ];

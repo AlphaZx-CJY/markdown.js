@@ -6,8 +6,7 @@
 - [x] [bold](src/plugins/strong.ts)
 - [x] [italic](src/plugins/italic.ts)
 - [x] [blockquote](src/plugins/blockquote.ts)
-- [ ] ordered list
-- [ ] unordered list
+- [ ] [list](src/plugins/list.ts)
 - [x] [code](src/plugins/code.ts)
 - [x] [horizontal rule](src/plugins/hr.ts)
 - [ ] [link](src/plugins/link.ts)
@@ -25,4 +24,4 @@
 - [x] [codeblock](src/plugins/codeblock.ts)
 - [ ] table
 - [ ] checkbox
-- [ ] underline
+- [x] underscore

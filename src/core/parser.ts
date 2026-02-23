@@ -70,7 +70,7 @@ export class MarkdownParser {
         blocks.push(res.value);
         pos = res.nextPos;
       } else {
-        break; // if no parser matches, exit to avoid infinite loop
+        pos++;
       }
     }
     return blocks;

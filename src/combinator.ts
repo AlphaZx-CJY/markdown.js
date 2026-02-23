@@ -16,11 +16,6 @@ export const string =
     return { value: s, nextPos: pos + s.length };
   };
 
-export const anyChar: Parser<string> = (input, pos) => {
-  if (pos >= input.length) return null;
-  return { value: input[pos], nextPos: pos + 1 };
-};
-
 export const many =
   <T>(parser: Parser<T>): Parser<T[]> =>
   (input, pos) => {
@@ -64,7 +59,7 @@ export const map =
       return null;
     }
     const transformed = fn(result.value);
-    if (!transformed) {
+    if (transformed === null) {
       return null;
     }
     return {
