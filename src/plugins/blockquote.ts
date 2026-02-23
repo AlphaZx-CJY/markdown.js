@@ -1,4 +1,4 @@
-import { anyOf, char, eof, many1, map, optional, sequence, until } from '../combinator';
+import { anyOf, char, eof, many1, map, optional, sequence, skip, until } from '../combinator';
 import type { Blockquote } from '../core/ast';
 import type { ASTNode, ParseFunc, Plugin, PluginInitContext } from '../core/types';
 
@@ -15,7 +15,8 @@ export default (): Plugin => {
         sequence(
           char('>'), // start flag
           optional(char(' ')),
-          until(anyOf(char('\n'), eof())) // end flag
+          until(anyOf(char('\n'), eof())), // end flag
+          optional(skip(char('\n'))) // skip line break
         )
       ),
       (value): Blockquote | null => {

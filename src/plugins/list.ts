@@ -1,4 +1,4 @@
-import { anyOf, char, eof, many1, map, oneOf, optional, sequence, until } from '../combinator';
+import { anyOf, char, eof, many1, map, oneOf, optional, sequence, skip, until } from '../combinator';
 import type { ASTNode, List, ListItem } from '../core/ast';
 import type { ParseFunc, Plugin, PluginInitContext } from '../core/types';
 
@@ -21,7 +21,8 @@ export default (): Plugin => {
           ([, checked]) => (checked ? '[x]' : null)
         )
       ), // Parser<string | null>
-      until(anyOf(char('\n'), eof())) // Parser<string>
+      until(anyOf(char('\n'), eof())), // Parser<string>
+      optional(skip(char('\n'))) // Parser<void>
     ),
     ([, , checked, content]): ListItem | null => {
       return {
@@ -36,7 +37,8 @@ export default (): Plugin => {
       many1(oneOf('0123456789')), // Parser<string>
       char('.'), // Parser<string>
       char(' '), // Parser<string>
-      until(anyOf(char('\n'), eof())) // Parser<string>
+      until(anyOf(char('\n'), eof())), // Parser<string>
+      optional(skip(char('\n'))) // Parser<void>
     ),
     ([, , content]): ListItem | null => {
       return {

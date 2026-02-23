@@ -6,14 +6,14 @@
 - [x] [bold](src/plugins/strong.ts)
 - [x] [italic](src/plugins/italic.ts)
 - [x] [blockquote](src/plugins/blockquote.ts)
-- [ ] [list](src/plugins/list.ts)
+- [x] [list](src/plugins/list.ts)
 - [x] [code](src/plugins/code.ts)
 - [x] [horizontal rule](src/plugins/hr.ts)
-- [ ] [link](src/plugins/link.ts)
+- [x] [link](src/plugins/link.ts)
 - [x] [image](src/plugins/image.ts)
 - [x] [break line](src/plugins/br.ts)
 - [x] [paragraph](src/plugins/paragraph.ts)
-- [ ] text
+- [x] text
 - [x] escaping
 - [ ] html
 
@@ -23,5 +23,5 @@
 - [x] [mark](src/plugins/mark.ts)
 - [x] [codeblock](src/plugins/codeblock.ts)
 - [ ] table
-- [ ] checkbox
+- [x] checkbox
 - [x] underscore
